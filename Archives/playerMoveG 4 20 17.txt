@@ -1,0 +1,143 @@
+function [states,handles] = playerMoveG(states,handles)
+% function accounts for statistics of each player and then analyzes health
+% strategy, and characteristics to move one of 6 ways : up, down, left,
+% right, defend, or attack. The following cases are temporary guidelines to
+% determine gameplay.
+
+
+% Assign the encounter's stats to a new variable's stats, called player1
+player1 = states.currentEncounter;
+
+% Assign player2 the states of the user
+player2 = states.player;
+
+% initialize cell array of moves dependent upon player speed
+moveSequence = cell(1,player1.speed);
+
+% keep track of current postition
+currentPos = player1.encounterPos;
+switch player1.strategy
+    case 'flee'
+        % flees from opponent by dividing board into quadrants and moving 
+        % to corner opposite the quadrant that the enemy is is. Once in
+        % opposite corner, dUp.
+        for iFlee = 1:player1.speed
+            % if opponent is in upper left quadrant, move to bottom right
+            % corner
+            if player2.pos(1) < 7 && player2.encounterPos(2) < 7
+                % dUp if already in corner
+                if currentPos == [12,12]
+                    moveSequence{1,iFlee} = 'dUp';
+                % determine if player1 is further from the corner in
+                % columns or in rows
+                elseif currentPos(1) < currentPos(2)
+                    moveSequence{1,iFlee} = 'down';
+                else
+                    moveSequence{1,iFlee} = 'right';
+                end % if currentPos = [12,12]
+            % if opponent is in upper right quadrant, move to bottom left
+            % corner
+            elseif player2.encounterPos(1) < 7 && player2.encounterPos(2) >= 7
+                % dUp if already in corner
+                if currentPos == [12,1]
+                    moveSequence{1,iFlee} = 'dUp';
+                % determine if player1 is further from the corner in
+                % columns or in rows
+                elseif currentPos(1) < currentPos(2)
+                    moveSequence{1,iFlee} = 'down';
+                else
+                    moveSequence{1,iFlee} = 'left';
+                end % if currentPos = [12,1]
+            % if opponent is in lower left quadrant, move to top right
+            % corner
+            elseif player2.encounterPos(1) >= 7 && player2.encounterPos(2) < 7
+                % dUp if already in corner
+                if currentPos == [1,12]
+                    moveSequence{1,iFlee} = 'dUp';
+                % determine if player1 is further from the corner in
+                % columns or in rows
+                elseif  currentPos(1) < currentPos(2)
+                    moveSequence{1,iFlee} = 'right';
+                else
+                    moveSequence{1,iFlee} = 'up';
+                end % if currentPos = [1,12]
+            % if opponent is in lower right quadrant, move to top left
+            % corner
+            elseif player2.encounterPos(1) >= 7 && player2.encounterPos(2) >= 7
+                % dUp if already in corner
+                if currentPos == [1,1]
+                    moveSequence{1,iFlee} = 'dUp';
+                elseif currentPos(1) < currentPos(2)
+                    moveSequence{1,iFlee} = 'left';
+                else
+                    moveSequence{1,iFlee} = 'up';
+                end % if currentPos = [1,1]
+            end % if player2.pos(1) < 7 && player2.pos(2) < 7
+        end % for iFlee = 1:player1.speed
+                    
+        
+    case 'coward'
+        % refuses to move even if far from enemy and high health
+        % dUps for all of its moves
+        for iCnt = 1:player1.speed
+            moveSequence{1,iCnt} = 'dUp';
+        end % for iCnt = 1:player1.speed
+        
+    case 'passive'
+        % defends more than neutral
+        
+    case 'neutral'
+        % correct analysis of position and health
+        
+    case 'active'
+        % attacks more than neutral
+        
+    case 'suicidal'
+        % moves towards enemy with no regard to health
+        movesMade = 0; % keeps track of moves made
+        % this while loop will cause player1 to move towards player2 as
+        % long as it is not within attack range and number of moves made is
+        % less than player1 speed
+        while ~(abs(currentPos(1)-player2.encounterPos(1)) <= player1.range && abs(currentPos(2)-player2.encounterPos(2))) && movesMade < player1.speed
+            movesMade = movesMade+1; % increment movesMade
+            % evaluate if player 1 is farther away in rows than columns
+            % from player 2
+            if (abs(currentPos(1) - player2.encounterPos(1)) > abs(currentPos(2) - player2.encounterPos(2)))
+                % player 1 moves down if its position is above player 2
+                if currentPos(1) < player2.encounterPos(1)
+                    moveSequence{1,movesMade} = 'down';
+                    currentPos = [currentPos(1)+1,currentPos(2)];
+                    
+                else % player moves up
+                    moveSequence{1,movesMade} = 'up';
+                    currentPos = [currentPos(1)-1,currentPos(2)];
+                    
+                end % player1.pos(1) < player2.pos(1)
+            else % will occur if player 1 is farther away in columns than rows
+                % player 1 moves right if its position is left of player 2
+                if currentPos(2) < player2.encounterPos(2)
+                    moveSequence{1,movesMade} = 'right';
+                    currentPos = [currentPos(1),currentPos(2)+1];
+                else % player moves up
+                    moveSequence{1,movesMade} = 'left';
+                    currentPos = [currentPos(1),currentPos(2)-1];
+                    
+                end % player1.pos(2) < player2.pos(2)
+            end % (abs(player1.pos(1) - player2.pos(1)) > abs(player1.pos(2) - player2.pos(2)))
+            % evaluates if close enough to attack, then attacks regardless
+        end % ends while not in range and still has moves        
+       
+        % set move to 'attack' for remaining moves
+        if abs(currentPos(1)-player2.encounterPos(1)) <= player1.range && abs(currentPos(2)-player2.encounterPos(2))
+            movesMade = movesMade + 1;
+            for iAttack = movesMade:player1.speed
+                moveSequence{1,iAttack} = 'attack';
+            end % for iAttack = 1:player1.speed
+        end % ends close enough if statement
+        
+end
+
+player1.encounterPos = currentPos;
+states.currentEncounter = player1;
+states.encounterTurn = states.encounterTurn + 1;
+states.player.movesRemaining = states.player.speed;

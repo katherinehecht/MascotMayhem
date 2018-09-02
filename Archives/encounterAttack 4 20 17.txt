@@ -1,0 +1,30 @@
+function [states,handles] = encounterAttack(states,handles)
+% Attack function for when an enemy is attacking the player
+
+% Creates easier-to-use variable names for the pertinent values
+strength = states.currentEncounter.strength;
+accuracy = states.currentEncounter.accuracy;
+defense = states.player.defense;
+
+% Calculates the amount of damage to be dealt
+dmgRange = ceil(strength - accuracy*strength/100);
+randInt = randi(dmgRange) - 1;
+dmg = strength - randInt;
+netDmg = round(dmg*(1-defense/100));
+
+if netDmg >= states.player.health
+    netDmg = states.player.health;
+end
+
+% Subtracts damage done from player's health
+states.player.health = states.player.health - netDmg;
+
+console(['You have taken ',num2str(netDmg),' damage!'],handles);
+
+if states.player.health <= 0
+    console('You have been defeated!',handles);
+    states.inEncounter = false;
+    states.player.health = states.player.maxHealth;
+    states.player.pos = [1,1];
+    states.player.encounterPos = [1,1];
+end

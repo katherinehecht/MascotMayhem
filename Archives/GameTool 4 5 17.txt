@@ -1,0 +1,171 @@
+function varargout = GameTool(varargin)
+% GAMETOOL MATLAB code for GameTool.fig
+%      GAMETOOL, by itself, creates a new GAMETOOL or raises the existing
+%      singleton*.
+%
+%      H = GAMETOOL returns the handle to a new GAMETOOL or the handle to
+%      the existing singleton*.
+%
+%      GAMETOOL('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in GAMETOOL.M with the given input arguments.
+%
+%      GAMETOOL('Property','Value',...) creates a new GAMETOOL or raises the
+%      existing singleton*.  Starting from the left, property value pairs are
+%      applied to the GUI before GameTool_OpeningFcn gets called.  An
+%      unrecognized property name or invalid value makes property application
+%      stop.  All inputs are passed to GameTool_OpeningFcn via varargin.
+%
+%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%      instance to run (singleton)".
+%
+% See also: GUIDE, GUIDATA, GUIHANDLES
+
+% Edit the above text to modify the response to help GameTool
+
+% Last Modified by GUIDE v2.5 22-Mar-2017 20:18:39
+
+% Begin initialization code - DO NOT EDIT
+gui_Singleton = 1;
+gui_State = struct('gui_Name',       mfilename, ...
+                   'gui_Singleton',  gui_Singleton, ...
+                   'gui_OpeningFcn', @GameTool_OpeningFcn, ...
+                   'gui_OutputFcn',  @GameTool_OutputFcn, ...
+                   'gui_LayoutFcn',  [] , ...
+                   'gui_Callback',   []);
+if nargin && ischar(varargin{1})
+    gui_State.gui_Callback = str2func(varargin{1});
+end
+
+if nargout
+    [varargout{1:nargout}] = gui_mainfcn(gui_State, varargin{:});
+else
+    gui_mainfcn(gui_State, varargin{:});
+end
+% End initialization code - DO NOT EDIT
+
+
+% --- Executes just before GameTool is made visible.
+function GameTool_OpeningFcn(hObject, eventdata, handles, varargin)
+% This function has no output args, see OutputFcn.
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% varargin   command line arguments to GameTool (see VARARGIN)
+
+% Choose default command line output for GameTool
+handles.output = hObject;
+
+% Update handles structure
+guidata(hObject, handles);
+
+% UIWAIT makes GameTool wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
+
+% The startup function is called and states is passed to the GUI program.
+% We save states in a file because otherwise the whole variable will
+% disappear after GameTool_OpeningFcn runs.
+states = startup;
+save('statesData','states');
+handles.healthTxt.String = num2str(states.player.health);
+handles.accuracyTxt.String = num2str(states.player.accuracy);
+handles.strengthTxt.String = num2str(states.player.strength);
+handles.defenseTxt.String = num2str(states.player.defense);
+handles.speedTxt.String = num2str(states.player.speed);
+handles.critTxt.String = num2str(states.player.critChance);
+handles.rangeTxt.String = num2str(states.player.range);
+
+
+% --- Outputs from this function are returned to the command line.
+function varargout = GameTool_OutputFcn(hObject, eventdata, handles) 
+% varargout  cell array for returning output args (see VARARGOUT);
+% hObject    handle to figure
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Get default command line output from handles structure
+varargout{1} = handles.output;
+
+
+% --- Executes on button press in quitButton.
+function quitButton_Callback(hObject, eventdata, handles)
+% hObject    handle to quitButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in attackButton.
+function attackButton_Callback(hObject, eventdata, handles)
+% hObject    handle to attackButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+load('statesData');
+
+if states.inEncounter
+    states = attack(states);
+else
+    for i=1:10
+        if states.player.pos == states.positions{i};
+            states.inEncounter = true;
+        end
+    end
+    if ~states.inEncounter
+        disp('You are not on an encounter.');
+    end
+end
+
+save('statesData','states');
+
+% --- Executes on button press in dUpButton.
+function dUpButton_Callback(hObject, eventdata, handles)
+% hObject    handle to dUpButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in upButton.
+function upButton_Callback(hObject, eventdata, handles)
+% hObject    handle to upButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% We load states, move the player up, and then save states.
+load('statesData');
+states = moveUp(states);
+save('statesData','states');
+
+
+% --- Executes on button press in rightButton.
+function rightButton_Callback(hObject, eventdata, handles)
+% hObject    handle to rightButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% We load states, move the player to the right, and then save states.
+load('statesData');
+states = moveRight(states);
+save('statesData','states');
+
+
+% --- Executes on button press in downButton.
+function downButton_Callback(hObject, eventdata, handles)
+% hObject    handle to downButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% We load states, move the player down, and then save states.
+load('statesData');
+states = moveDown(states);
+save('statesData','states');
+
+
+% --- Executes on button press in leftButton.
+function leftButton_Callback(hObject, eventdata, handles)
+% hObject    handle to leftButton (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% We load states, move the player to the left, and then save states.
+load('statesData');
+states = moveLeft(states);
+save('statesData','states');

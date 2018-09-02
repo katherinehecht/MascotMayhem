@@ -1,0 +1,35 @@
+function [states,handles] = updateGUI(states,handles)
+% Updates GUI elements to accurately reflect the state of the game
+
+if states.inEncounter
+    posStr = [num2str(states.player.encounterPos(1)),',',num2str(states.player.encounterPos(2))];
+    handles.nameTxt.String = states.currentEncounter.name;
+    encHealthStr = [num2str(states.currentEncounter.health),'/',num2str(states.currentEncounter.maxHealth)];
+    handles.encHealthTxt.String = encHealthStr;
+    handles.encPosTxt.String = [num2str(states.currentEncounter.encounterPos(1)),',',num2str(states.currentEncounter.encounterPos(2))];
+    handles.turnTxt.String = num2str(min([states.playerTurn,states.encounterTurn]) + 1);
+    handles.movesTxt.String = num2str(states.player.movesRemaining);
+else
+    posStr = [num2str(states.player.pos(1)),',',num2str(states.player.pos(2))];
+    handles.nameTxt.String = ' ';
+    handles.encHealthTxt.String = ' ';
+    handles.encPosTxt.String = ' ';
+    handles.turnTxt.String = ' ';
+    handles.movesTxt.String = ' ';
+end
+handles.posTxt.String = posStr;
+
+healthStr = [num2str(states.player.health),'/',num2str(states.player.maxHealth)];
+handles.healthTxt.String = healthStr;
+
+handles.accuracyTxt.String = num2str(states.player.accuracy);
+
+handles.strengthTxt.String = num2str(states.player.strength);
+
+handles.defenseTxt.String = num2str(states.player.defense,3);
+
+handles.speedTxt.String = num2str(states.player.speed);
+
+handles.critTxt.String = num2str(states.player.critChance);
+
+handles.rangeTxt.String = num2str(states.player.range);

@@ -1,0 +1,70 @@
+function [states,handles] = attack(states,handles)
+% Performs a player's attack upon an encounter
+
+% If the player is not in range, no attack will be completed and the
+% console will alert the user.
+playerPos = states.player.encounterPos;
+encounterPos = states.currentEncounter.encounterPos;
+range = states.player.range;
+if abs(playerPos(1)-encounterPos(1)) > range || abs(playerPos(2)-encounterPos(2)) > range
+    handles = console('You are not within range.',handles);
+
+% If the player is within range, he will perform an attack.
+else
+    % Creates easier-to-use variable names for the pertinent values
+    strength = states.player.strength;
+    accuracy = states.player.accuracy;
+    defense = states.currentEncounter.defense;
+    
+    % Calculates the amount of damage to be dealt
+    dmgRange = ceil(strength - accuracy*strength/100);
+    randInt = randi(dmgRange) - 1;
+    dmg = strength - randInt;
+    netDmg = round(dmg*(1-defense/100));
+    
+    if netDmg >= states.currentEncounter.health
+        netDmg = states.currentEncounter.health;
+    end
+    
+    % Subtracts damage done from opponent's health
+    states.currentEncounter.health = states.currentEncounter.health - netDmg;
+    
+    console(['You deal ',num2str(netDmg),' damage!'],handles);
+    
+    if states.currentEncounter.health <= 0
+        console('You have slain your enemy!',handles);
+        states.inEncounter = false;
+        states.player.health = states.player.maxHealth;
+        
+        % Update the statistics of the encounter so that they are saved in
+        % states.encounterName instead of states.currentEncounter
+        switch states.currentEncounter.name
+            case 'Purple Weasel'
+                states.purpleWeasel = states.currentEncounter;
+            case 'Duck'
+                states.duck = states.currentEncounter;
+            case 'Angry Mob'
+                states.angryMob = states.currentEncounter;
+            case 'Zahmbie'
+                states.zahmbie = states.currentEncounter;
+            case 'Gentleman'
+                states.gentleman = states.currentEncounter;
+            case 'Juggerknott'
+                states.juggerknott = states.currentEncounter;
+            case 'Bear'
+                states.bear = states.currentEncounter;
+            case 'Lion'
+                states.lion = states.currentEncounter;
+            case 'Mars Rover'
+                states.marsRover = states.currentEncounter;
+                console('You have unleashed the anger of the professor!',handles);
+                console('You''d better go find him!');
+            case 'Dr. Seelinger'
+                states.drSeelinger = states.currentEncounter;
+                console('You have just completed Mascot Mayhem!',handles);
+                console('CONGRATULATIONS!!!',handles);
+        end
+    end
+    
+    states.player.movesRemaining = states.player.movesRemaining - 1;
+end

@@ -1,0 +1,27 @@
+function [states,handles] = attack(states,handles)
+% Performs a player's attack upon an encounter
+
+% If the player is not in range, no attack will be completed and the
+% console will alert the user.
+playerPos = states.player.encounterPos;
+encounterPos = states.currentEncounter.encounterPos;
+range = states.player.range;
+if abs(playerPos(1)-encounterPos(1)) > range || abs(playerPos(2)-encounterPos(2)) > range
+    handles = console('You are not within range.',handles);
+
+% If the player is within range, he will perform an attack.
+else
+    % Creates easier-to-use variable names for the pertinent values
+    strength = states.player.strength;
+    accuracy = states.player.accuracy;
+    defense = states.currentEncounter.defense;
+    
+    % Calculates the amount of damage to be dealt
+    dmgRange = ceil(strength - accuracy*strength/100);
+    randInt = randi(dmgRange) - 1;
+    dmg = strength - randInt;
+    netDmg = round(dmg-defense/100);
+    
+    % Subtracts damage done from opponent's health
+    states.currentEncounter.health = states.currentEncounter.health - netDmg;
+end
